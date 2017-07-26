@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>canvas 粒子系统</title>
+  <style>
+     #canvas {
+       display: block;
+       margin: 0 auto;
+     }
+  </style>
+</head>
+<body>
+     <canvas id="canvas" style="background-color: #eeeeee;" width="1000;" height="360;"></canvas>
+     <script>
+      let canvas = document.getElementById('canvas');
+      let ctx = canvas.getContext('2d');
+      // 数据模型
+      // var ball = {
+      //   xPointer:100,
+      //   yPointer:100,
+      //   radius: 10,
+      //   color: 'blue'
+      // }......2
+
+      var ballList = [];
+      // 绘制小球
+      // canvas 绘制api  圆 填充一些颜色
+      function draw() {
+        ctx.clearRect(0, 0, 1000, 360);
+        for (var i = 0; i < ballList.length; i++) {
+        ctx.save();
+        ctx.beginPath(); //开始画
+        ctx.fillStyle = ballList[i].color;
+        ctx.arc(ballList[i].xPointer,ballList[i].yPointer, ballList[i].radius, 0, Math.PI*2, false); //圆心 半径20
+        ctx.closePath(); //结束了
+        ctx.fill();
+        }
+      }
+      function update () {
+        // 小球动起来
+        // 运动方向？   random
+        // 运动的速度   random
+        for (var i = 0; i < ballList.length; i++) {
+          ballList[i].xPointer += ballList[i].vx * ballList[i].x;
+          ballList[i].yPointer += ballList[i].vy * ballList[i].y;
+          if (ballList[i].xPointer + ballList[i].radius >= canvas.width || ballList[i].xPointer - ballList[i].radius <= 0) {
+                   ballList[i].x = ballList[i].x * -1;
+               }
+               //碰撞检测 Y轴方向
+               if (ballList[i].yPointer + ballList[i].radius >= canvas.height || ballList[i].yPointer - ballList[i].radius <= 0) {
+                   ballList[i].y = ballList[i].y * -1;
+               }
+        }
+      }
+      function init() {
+      // 生成小球吧
+      for(var i=0; i< 60; i++) {
+        var ball ={};
+        // 数据模型有了， 比对这造球
+        // 随机坐标 封装成函数  20 980   1000px
+        ball.xPointer = getRandom(20, 980);     //随机
+        ball.yPointer = getRandom(20, 340);
+        ball.radius = 5;
+        ball.color = "#" + ("00000" + ((Math.random() * 16777215 + 0.5) >> 0).toString(16)).slice(-6);
+        ball.x = getIndex();// 水平方向的运动方向
+        ball.y = getIndex();   //垂直方向的运动方向
+        ball.vx = Math.random();
+        ball.vy = Math.random();
+        ballList.push(ball)
+      }
+      console.log(ballList);
+      // 帧动画
+      setInterval(() => {
+          // 本质：不停的画  不停的擦除
+          // 1s = 1000ms
+          // /24 =41帧    游戏60帧以上
+          draw();
+          update();
+          drawLine ()
+      } ,24);
+     function drawLine () {
+       for(var i = 0; i< ballList.length; i++){
+         for (var j=0; j< ballList.length; j++){
+           var xx = Math.pow(
+             (ballList[i].xPointer-ballList[j].xPointer),2);
+           var yy = Math.pow(
+             (ballList[i].xPointer-ballList[j].xPointer),2);
+          var zz = Math.sqrt(xx + yy);
+          if(zz <= 100 && zz >=20) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.strokeStyle = '#999999';
+            ctx.lineWidth = 0.1;
+            ctx.moveTo(ballList[i].xPointer,ballList[i].yPointer); //起始点
+            ctx.lineTo(ballList[j].xPointer,ballList[j].yPointer); //结束点
+            ctx.closePath();
+            ctx.stroke();
+            ctx.restore();
+          }
+         }
+       }
+     }
+    }
+    // 生成一个在范围内的随机数
+    function getRandom(start, end) {
+      var choice = end - start + 1;
+      return Math.floor(Math.random()*choice) + start;
+    }
+
+    function getIndex() {
+      var arr = [0, 1];
+      var index = Math.floor(Math.random()*arr.length);
+      // var index = Math.floor(Math.random()*2);
+      if(index == 0){
+        index = -1;
+      }
+      return 1;
+      // 结果生成了1或-1
+    }
+
+    window.addEventListener('load', function() {//页面加载完成后
+        init();
+    }, false);
+
+     </script>
+</body>
+</html>
